@@ -1,0 +1,65 @@
+import numpy as np
+import pandas as pd
+import os
+import warnings
+warnings.filterwarnings("ignore")
+
+
+os.getcwd()
+
+os.chdir("C:\\Users\\gurme\\OneDrive\\Documents\\Documents\\Gagan\\DS\\DS\\Python\\Kaggle Comps\\Tabular Series-Aug")
+
+train=pd.read_csv("train.csv")
+
+test=pd.read_csv("test.csv")
+
+ss=pd.read_csv("sample_submission.csv")
+
+train.shape
+
+train.columns
+
+test.shape
+
+test.columns
+
+train.dtypes
+
+train.select_dtypes("object")
+
+#It shows 0 columns which means no columns are of "object" dtype. all are numeric.
+
+test.dtypes
+
+test.select_dtypes("object")
+
+# test also does not contain any object dtype value. 
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection  import RandomizedSearchCV
+
+clf=RandomForestClassifier()
+
+target_y=train["loss"]
+
+train_final=train.drop(["loss"],1)
+
+param_dist={"n_estimators":[100,200,300,400],"max_features":[5,10,20,25,30,35],"bootstrap":[True,False],
+            "class_weight":[None,"balanced"],"criterion":["entropy","gini"],"max_depth":[None,5,10,15,20],
+            "min_samples_leaf":[1,2,5,10,15,20],"min_samples_split":[2,5,10,15,20]}
+
+random_search=RandomizedSearchCV(clf,param_distributions=param_dist,n_iter=10,scoring="roc_auc",cv=2,n_jobs=-1,
+                                verbose=False)
+
+random_search.fit(train_final,target_y)
+
+clf.fit(train_final,target_y)
+
+predictions=random_search.predict(test)
+
+predictions=clf.predict(test)
+
+predictions_df=pd.DataFrame({"id":test.id,"loss":predictions})
+
+predictions_df.to_csv("Submission.csv",index=False)
+
